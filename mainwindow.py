@@ -41,17 +41,17 @@ class MainWindow(QMainWindow):
 
     def iniciar(self):
         while True:
-            # mostrar procesos
-            for i in range(0,self.lote_tam + 1):
-                self.ui.enEspera_plainTextEdit.appendPlainText(
-                    f"\n{self.cola_procesos[i].id}. {self.cola_procesos[i].nombre}\n{self.cola_procesos[i].operacion}\n{self.cola_procesos[i].tme}")
-
             # mostrar lotes pedientes
             pedientes = (math.ceil(len(self.cola_procesos) / self.lote_tam)) - 1
             if (pedientes >= 0):
                 self.ui.lotesPendientes_label.setText(f"{pedientes}")
-
+                # mostrar procesos
+                for i in range(0,self.lote_tam + 1):
+                    self.ui.enEspera_plainTextEdit.appendPlainText(f"\n{self.cola_procesos[i].id}. {self.cola_procesos[i].nombre}\n{self.cola_procesos[i].operacion}\n{self.cola_procesos[i].tme}")
             
+            # ejecucion
+                    
+            # terminados
 
             # reloj global
             self.ui.cont_global_label.setText(f"{self.reloj_global}")
