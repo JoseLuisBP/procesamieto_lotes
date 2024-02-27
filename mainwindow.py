@@ -40,25 +40,57 @@ class MainWindow(QMainWindow):
             print(p.nombre)
 
     def iniciar(self):
+        lote = []
+        loteF = []
+        ocupado = False
+        c_tme = -1
+
         while True:
             # mostrar lotes pedientes
             pedientes = (math.ceil(len(self.cola_procesos) / self.lote_tam)) - 1
             if (pedientes >= 0):
                 self.ui.lotesPendientes_label.setText(f"{pedientes}")
-                # mostrar procesos
-                for i in range(0,self.lote_tam + 1):
-                    self.ui.enEspera_plainTextEdit.appendPlainText(f"\n{self.cola_procesos[i].id}. {self.cola_procesos[i].nombre}\n{self.cola_procesos[i].operacion}\n{self.cola_procesos[i].tme}")
-            
-            # ejecucion
-                    
-            # terminados
 
-            # reloj global
-            self.ui.cont_global_label.setText(f"{self.reloj_global}")
-            self.reloj_global += 1
-            self.dormicion(1000)
+                if not ocupado:
+                    for i in range(0, self.lote_tam):
+                        lote.append(self.cola_procesos.pop(0))
+                    ocupado = True
+                # mostrar procesos
+                self.mostrarLote(lote, False)
+            
+                # ejecucion
+                if c_tme >= -1:
+                    if c_tme == 0 or c_tme >= 0:
+                        if c_tme == 0 or c_tme == -1:
+                            pcs_exe = lote.pop(0)
+                        if pcs_exe.tme == 0:
+                            pcs_exe.generarResultado()
+                            loteF.append(pcs_exe)
+                        
+                        if c_tme >= 0:
+                            c_tme = pcs_exe.tme
+                            self.ui.ejecucion_plainTextEdit.setPlainText(f"{pcs_exe.id}. {pcs_exe.nombre}\n{pcs_exe.operacion}\nTME: {pcs_exe.tme}")
+                            pcs_exe.tme -= 1
+                        
+                    # terminados
+                    self.mostrarLote(loteF, True)
+
+                    # reloj global
+                    self.ui.cont_global_label.setText(f"{self.reloj_global}")
+                    self.reloj_global += 1
+                    self.dormicion(1000)
     
     def dormicion(self, time):
         loop = QEventLoop()
         QTimer.singleShot(time, loop.quit)
         loop.exec_()
+
+    def mostrarLote(self, lote, finalizado):
+        self.ui.enEspera_plainTextEdit.clear()
+        self.ui.terminados_plainTextEdit.clear()
+        if not finalizado:
+            for p in lote:
+                self.ui.enEspera_plainTextEdit.appendPlainText(f"{p.id}. {p.nombre}\n{p.operacion}\nTME: {p.tme}")
+        else:
+            for p in lote:
+                self.ui.terminados_plainTextEdit.appendPlainText(f"{p.id}. {p.nombre}\n{p.operacion}\n = {p.resultado}")
